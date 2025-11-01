@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Ayham Terminal v2</title>
+  <title>AyhamVerse v5: Beast Mode RPG Edition</title>
   <style>
     body {
       margin: 0;
@@ -11,11 +11,27 @@
       font-family: monospace;
       padding: 20px;
     }
-    #terminal {
+    h1 {
+      text-align: center;
+      color: #0ff;
+    }
+    .game-button {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      background: #111;
+      border: 1px solid #0f0;
+      color: #0f0;
+      cursor: pointer;
+    }
+    #terminal, #rpg, #output {
+      margin-top: 20px;
       white-space: pre-wrap;
       line-height: 1.5;
+      max-height: 300px;
       overflow-y: auto;
-      max-height: 90vh;
+      border: 1px solid #0f0;
+      padding: 10px;
     }
     input {
       background: #000;
@@ -29,102 +45,69 @@
   </style>
 </head>
 <body>
-  <div id="terminal">Ayham Terminal v2.0\nType 'help' to begin\n\n></div>
-  <input id="cmdInput" autofocus />
+  <h1>AyhamVerse v5: Beast Mode RPG Edition</h1>
+
+  <div id="launcher">
+    <div class="game-button" onclick="launchGame('ayhamball')">AyhamBall</div>
+    <div class="game-button" onclick="launchGame('bughunter')">Bug Hunter</div>
+    <div class="game-button" onclick="launchGame('escape')">Escape the Classroom</div>
+    <div class="game-button" onclick="launchGame('jump')">Ayham Jump</div>
+    <div class="game-button" onclick="launchGame('terminalwars')">Terminal Wars</div>
+    <div class="game-button" onclick="launchGame('puzzle')">AyLang Puzzle</div>
+    <div class="game-button" onclick="launchGame('tycoon')">Ayham Tycoon</div>
+    <div class="game-button" onclick="launchGame('legend')">Legend Meter</div>
+    <div class="game-button" onclick="launchGame('hackersim')">Hacker Sim</div>
+    <div class="game-button" onclick="launchGame('rpg')">AyLang RPG</div>
+  </div>
+
+  <div id="output">Select a game to begin...</div>
+  <div id="terminal"></div>
+  <div id="rpg"></div>
+  <input id="cmdInput" placeholder="Type AyLang command..." />
 
   <script>
+    const output = document.getElementById("output");
     const terminal = document.getElementById("terminal");
+    const rpg = document.getElementById("rpg");
     const input = document.getElementById("cmdInput");
-    const startTime = performance.now();
-    let username = "guest";
 
-    input.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter") {
-        const cmd = input.value.trim();
-        terminal.innerText += cmd + "\n";
-        input.value = "";
-        await runCommand(cmd);
-        terminal.innerText += ">\n";
-        terminal.scrollTop = terminal.scrollHeight;
-      }
-    });
-
-    async function runCommand(cmd) {
-      const args = cmd.split(" ");
-      const base = args[0];
-
-      if (base === "help") {
-        terminal.innerText += "Available commands:\n- ayinfo\n- aytop\n- uptime\n- clear\n- whoami\n- setuser [name]\n- aydate\n- aylang\n- matrix\n- reboot\n";
-      } else if (base === "ayinfo") {
-        const ua = navigator.userAgent;
-        const platform = navigator.platform;
-        const cores = navigator.hardwareConcurrency;
-        const screenSize = `${screen.width}x${screen.height}`;
-        terminal.innerText += `OS: ${platform}\nBrowser: ${ua}\nCPU Cores: ${cores}\nScreen: ${screenSize}\n`;
-      } else if (base === "aytop") {
-        if (performance.memory) {
-          const mem = performance.memory;
-          terminal.innerText += `RAM Used: ${(mem.usedJSHeapSize / 1e6).toFixed(2)} MB\nTotal RAM: ${(mem.totalJSHeapSize / 1e6).toFixed(2)} MB\n`;
-        } else {
-          terminal.innerText += "RAM info not available in this browser.\n";
-        }
-      } else if (base === "uptime") {
-        const uptime = Math.floor((performance.now() - startTime) / 1000);
-        const mins = Math.floor(uptime / 60);
-        const secs = uptime % 60;
-        terminal.innerText += `Uptime: ${mins}m ${secs}s\n`;
-      } else if (base === "clear") {
-        terminal.innerText = "Ayham Terminal v2.0\nType 'help' to begin\n\n>";
-      } else if (base === "whoami") {
-        terminal.innerText += `Username: ${username}\nPlatform: ${navigator.platform}\nBrowser: ${navigator.userAgent}\nScreen: ${screen.width}x${screen.height}\nCPU Cores: ${navigator.hardwareConcurrency}\n`;
-      } else if (base === "setuser") {
-        if (args[1]) {
-          username = args[1];
-          terminal.innerText += `Username set to ${username}\n`;
-        } else {
-          terminal.innerText += "Usage: setuser [name]\n";
-        }
-      } else if (base === "aydate") {
-        terminal.innerText += `Date: ${new Date().toString()}\n`;
-      } else if (base === "aylang") {
-        terminal.innerText += 'AyLang Interpreter Ready. Type: say "hello"\n';
-        input.onkeydown = function (e) {
-          if (e.key === "Enter") {
-            const code = input.value.trim();
-            terminal.innerText += code + "\n";
-            input.value = "";
-            if (code.startsWith("say ")) {
-              const match = code.match(/say "(.*)"/);
-              terminal.innerText += match ? match[1] + "\n" : "Syntax error\n";
-            } else if (code === "exit") {
-              terminal.innerText += "Exiting AyLang...\n";
-              input.onkeydown = defaultHandler;
-            } else {
-              terminal.innerText += "Unknown AyLang command\n";
-            }
-            terminal.innerText += ">\n";
-          }
-        };
-      } else if (base === "matrix") {
-        terminal.innerText += "Entering Matrix mode...\n";
-        let i = 0;
-        const interval = setInterval(() => {
-          terminal.innerText += Math.random().toString(2).substring(2, 18) + "\n";
-          terminal.scrollTop = terminal.scrollHeight;
-          i++;
-          if (i > 20) clearInterval(interval);
-        }, 100);
-      } else if (base === "reboot") {
-        terminal.innerText = "Rebooting Ayham Terminal...\n";
-        setTimeout(() => {
-          terminal.innerText = "Ayham Terminal v2.0\nType 'help' to begin\n\n>";
-        }, 1500);
+    function launchGame(game) {
+      output.innerText = `Launching ${game}...`;
+      if (game === "rpg") {
+        rpg.innerText = "Welcome to AyLang RPG!\nType commands like: move, attack, say \"hello\", quest\n";
       } else {
-        terminal.innerText += `Unknown command: ${cmd}\n`;
+        rpg.innerText = "";
+        terminal.innerText = `Game ${game} loaded.\n(Placeholder — plug in full module here)\n`;
       }
     }
 
-    const defaultHandler = input.onkeydown;
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const cmd = input.value.trim();
+        input.value = "";
+        if (rpg.innerText.includes("AyLang RPG")) {
+          runRPG(cmd);
+        } else {
+          terminal.innerText += `> ${cmd}\nUnknown command outside RPG.\n`;
+        }
+      }
+    });
+
+    function runRPG(cmd) {
+      rpg.innerText += `> ${cmd}\n`;
+      if (cmd === "move") {
+        rpg.innerText += "You move forward into the AyLang Temple.\n";
+      } else if (cmd === "attack") {
+        rpg.innerText += "You attack a corrupted bug. Victory!\n";
+      } else if (cmd.startsWith("say ")) {
+        const match = cmd.match(/say "(.*)"/);
+        rpg.innerText += match ? match[1] + "\n" : "Syntax error\n";
+      } else if (cmd === "quest") {
+        rpg.innerText += "Quest: Debug the AyLang compiler to unlock Beast Mode.\n";
+      } else {
+        rpg.innerText += "Unknown RPG command.\n";
+      }
+    }
   </script>
 </body>
 </html>
