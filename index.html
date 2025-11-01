@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Ayham Terminal</title>
+  <title>Ayham Terminal v2</title>
   <style>
     body {
       margin: 0;
@@ -14,6 +14,8 @@
     #terminal {
       white-space: pre-wrap;
       line-height: 1.5;
+      overflow-y: auto;
+      max-height: 90vh;
     }
     input {
       background: #000;
@@ -27,13 +29,14 @@
   </style>
 </head>
 <body>
-  <div id="terminal">Ayham Terminal v1.0\nType 'help' to begin\n\n></div>
+  <div id="terminal">Ayham Terminal v2.0\nType 'help' to begin\n\n></div>
   <input id="cmdInput" autofocus />
 
   <script>
     const terminal = document.getElementById("terminal");
     const input = document.getElementById("cmdInput");
     const startTime = performance.now();
+    let username = "guest";
 
     input.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
@@ -47,32 +50,81 @@
     });
 
     async function runCommand(cmd) {
-      if (cmd === "help") {
-        terminal.innerText += "Available commands:\n- ayinfo\n- aytop\n- uptime\n- clear\n";
-      } else if (cmd === "ayinfo") {
+      const args = cmd.split(" ");
+      const base = args[0];
+
+      if (base === "help") {
+        terminal.innerText += "Available commands:\n- ayinfo\n- aytop\n- uptime\n- clear\n- whoami\n- setuser [name]\n- aydate\n- aylang\n- matrix\n- reboot\n";
+      } else if (base === "ayinfo") {
         const ua = navigator.userAgent;
         const platform = navigator.platform;
         const cores = navigator.hardwareConcurrency;
-        const screen = `${screen.width}x${screen.height}`;
-        terminal.innerText += `OS: ${platform}\nBrowser: ${ua}\nCPU Cores: ${cores}\nScreen: ${screen}\n`;
-      } else if (cmd === "aytop") {
+        const screenSize = `${screen.width}x${screen.height}`;
+        terminal.innerText += `OS: ${platform}\nBrowser: ${ua}\nCPU Cores: ${cores}\nScreen: ${screenSize}\n`;
+      } else if (base === "aytop") {
         if (performance.memory) {
           const mem = performance.memory;
           terminal.innerText += `RAM Used: ${(mem.usedJSHeapSize / 1e6).toFixed(2)} MB\nTotal RAM: ${(mem.totalJSHeapSize / 1e6).toFixed(2)} MB\n`;
         } else {
           terminal.innerText += "RAM info not available in this browser.\n";
         }
-      } else if (cmd === "uptime") {
+      } else if (base === "uptime") {
         const uptime = Math.floor((performance.now() - startTime) / 1000);
         const mins = Math.floor(uptime / 60);
         const secs = uptime % 60;
         terminal.innerText += `Uptime: ${mins}m ${secs}s\n`;
-      } else if (cmd === "clear") {
-        terminal.innerText = "Ayham Terminal v1.0\nType 'help' to begin\n\n>";
+      } else if (base === "clear") {
+        terminal.innerText = "Ayham Terminal v2.0\nType 'help' to begin\n\n>";
+      } else if (base === "whoami") {
+        terminal.innerText += `Username: ${username}\nPlatform: ${navigator.platform}\nBrowser: ${navigator.userAgent}\nScreen: ${screen.width}x${screen.height}\nCPU Cores: ${navigator.hardwareConcurrency}\n`;
+      } else if (base === "setuser") {
+        if (args[1]) {
+          username = args[1];
+          terminal.innerText += `Username set to ${username}\n`;
+        } else {
+          terminal.innerText += "Usage: setuser [name]\n";
+        }
+      } else if (base === "aydate") {
+        terminal.innerText += `Date: ${new Date().toString()}\n`;
+      } else if (base === "aylang") {
+        terminal.innerText += 'AyLang Interpreter Ready. Type: say "hello"\n';
+        input.onkeydown = function (e) {
+          if (e.key === "Enter") {
+            const code = input.value.trim();
+            terminal.innerText += code + "\n";
+            input.value = "";
+            if (code.startsWith("say ")) {
+              const match = code.match(/say "(.*)"/);
+              terminal.innerText += match ? match[1] + "\n" : "Syntax error\n";
+            } else if (code === "exit") {
+              terminal.innerText += "Exiting AyLang...\n";
+              input.onkeydown = defaultHandler;
+            } else {
+              terminal.innerText += "Unknown AyLang command\n";
+            }
+            terminal.innerText += ">\n";
+          }
+        };
+      } else if (base === "matrix") {
+        terminal.innerText += "Entering Matrix mode...\n";
+        let i = 0;
+        const interval = setInterval(() => {
+          terminal.innerText += Math.random().toString(2).substring(2, 18) + "\n";
+          terminal.scrollTop = terminal.scrollHeight;
+          i++;
+          if (i > 20) clearInterval(interval);
+        }, 100);
+      } else if (base === "reboot") {
+        terminal.innerText = "Rebooting Ayham Terminal...\n";
+        setTimeout(() => {
+          terminal.innerText = "Ayham Terminal v2.0\nType 'help' to begin\n\n>";
+        }, 1500);
       } else {
         terminal.innerText += `Unknown command: ${cmd}\n`;
       }
     }
+
+    const defaultHandler = input.onkeydown;
   </script>
 </body>
 </html>
