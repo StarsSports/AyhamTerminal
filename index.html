@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ayham Terminal</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+      padding: 20px;
+    }
+    #terminal {
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+    input {
+      background: #000;
+      color: #0f0;
+      border: none;
+      font-family: monospace;
+      font-size: 16px;
+      width: 100%;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal">Ayham Terminal v1.0\nType 'help' to begin\n\n></div>
+  <input id="cmdInput" autofocus />
+
+  <script>
+    const terminal = document.getElementById("terminal");
+    const input = document.getElementById("cmdInput");
+    const startTime = performance.now();
+
+    input.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        const cmd = input.value.trim();
+        terminal.innerText += cmd + "\n";
+        input.value = "";
+        await runCommand(cmd);
+        terminal.innerText += ">\n";
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+    });
+
+    async function runCommand(cmd) {
+      if (cmd === "help") {
+        terminal.innerText += "Available commands:\n- ayinfo\n- aytop\n- uptime\n- clear\n";
+      } else if (cmd === "ayinfo") {
+        const ua = navigator.userAgent;
+        const platform = navigator.platform;
+        const cores = navigator.hardwareConcurrency;
+        const screen = `${screen.width}x${screen.height}`;
+        terminal.innerText += `OS: ${platform}\nBrowser: ${ua}\nCPU Cores: ${cores}\nScreen: ${screen}\n`;
+      } else if (cmd === "aytop") {
+        if (performance.memory) {
+          const mem = performance.memory;
+          terminal.innerText += `RAM Used: ${(mem.usedJSHeapSize / 1e6).toFixed(2)} MB\nTotal RAM: ${(mem.totalJSHeapSize / 1e6).toFixed(2)} MB\n`;
+        } else {
+          terminal.innerText += "RAM info not available in this browser.\n";
+        }
+      } else if (cmd === "uptime") {
+        const uptime = Math.floor((performance.now() - startTime) / 1000);
+        const mins = Math.floor(uptime / 60);
+        const secs = uptime % 60;
+        terminal.innerText += `Uptime: ${mins}m ${secs}s\n`;
+      } else if (cmd === "clear") {
+        terminal.innerText = "Ayham Terminal v1.0\nType 'help' to begin\n\n>";
+      } else {
+        terminal.innerText += `Unknown command: ${cmd}\n`;
+      }
+    }
+  </script>
+</body>
+</html>
